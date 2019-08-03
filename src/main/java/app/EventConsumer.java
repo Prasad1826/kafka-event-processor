@@ -37,10 +37,12 @@ public class EventConsumer {
         consumer.subscribe(Arrays.asList("streams-edtest2-output"));
 
         while (true) {
-            ConsumerRecords<String, Event> records = consumer.poll(Duration.ofMillis(1000));
-            for (ConsumerRecord<String, Event> record : records)
-                System.out.printf("offset = %d, key = %s, value = %s%n", record.offset(), record.key(), record.value());
-            //System.out.println("Finished checking/printing messages");
+            ConsumerRecords<String, Event> records = consumer.poll(Duration.ofMillis(10));
+            for (ConsumerRecord<String, Event> record : records) {
+                Event event = record.value();
+                System.out.printf("offset = %d, key = %s, value = %s%n", record.offset(), record.key(), record.value()+" "+(System.currentTimeMillis()-Long.parseLong(event.getData())));
+                //System.out.println("Finished checking/printing messages");
+            }
         }
     }
 
@@ -50,9 +52,10 @@ public class EventConsumer {
 
         while (true) {
             ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(1000));
-            for (ConsumerRecord<String, String> record : records)
+            for (ConsumerRecord<String, String> record : records) {
                 System.out.printf("offset = %d, key = %s, value = %s%n", record.offset(), record.key(), record.value());
-            //System.out.println("Finished checking/printing messages");
+                //System.out.println("Finished checking/printing messages");
+            }
         }
     }
 }

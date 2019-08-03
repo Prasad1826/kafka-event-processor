@@ -24,7 +24,10 @@ public class EventProducer {
         props.put("value.serializer", EventSerde.class.getName());
         //props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 
-        produceEvent("100-TRD-2", "STOP");
+        for (int i = 0; i < 1000; i++) {
+
+            produceEvent((100+i)+"-TRD-1", "START");
+        }
         //produceEvents(1);
         //produceString(10);
     }
@@ -34,7 +37,7 @@ public class EventProducer {
 
         for (int i = 0; i < n; i++) {
             ProducerRecord<String, String> rec = new ProducerRecord<String, String>("streams-edtest2-output",
-                    "key-"+Integer.toString(i), "Test" + Integer.toString(i));
+                    "key-"+Integer.toString(i), ""+System.currentTimeMillis());
             System.out.println(rec);
             producer.send(rec);
             try {
@@ -51,7 +54,7 @@ public class EventProducer {
         Producer<String, Event> producer = new KafkaProducer<>(props);
         producer.send(new ProducerRecord<String, Event>("streams-edtest2-input",
                 eventId.substring(0, eventId.lastIndexOf("-")),
-                new Event(eventId, "Test-" + eventId, status,false))
+                new Event(eventId, ""+System.currentTimeMillis(), status,false))
         );
         producer.flush();
         producer.close();

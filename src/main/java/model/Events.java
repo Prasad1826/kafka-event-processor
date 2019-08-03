@@ -7,8 +7,8 @@ public class Events {
 
     String eventId;
     Map<String, Event> events = new HashMap<>();
-    String inProcessId;
-    String toBePublished;
+    String inProcessId = "";
+    String toBePublished = "";
 
     public Events(String eventId, Event event) {
         System.out.println("Inside Events constructor<String, Event>");
