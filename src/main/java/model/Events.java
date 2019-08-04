@@ -11,11 +11,11 @@ public class Events {
     String toBePublished = "";
 
     public Events(String eventId, Event event) {
-        System.out.println("Inside Events constructor<String, Event>");
+        //System.out.println("Inside Events constructor<String, Event>");
         initialize(eventId, event);
     }
     private void initialize(String eventId, Event event) {
-        System.out.println(eventId+" "+event);
+        //System.out.println(eventId+" "+event);
         if(eventId==null || eventId.isEmpty())
             this.eventId = event.getId().substring(0, event.getId().lastIndexOf("-"));
         else
@@ -25,7 +25,7 @@ public class Events {
         this.inProcessId = event.getId();
     }
     public Events(String eventId, Map<String, Event> events, String inProcessId, String toBePublished) {
-        System.out.println("Inside Events constructor..");
+        //System.out.println("Inside Events constructor..");
         this.eventId = eventId;
         this.events = events;
         this.inProcessId = inProcessId;
@@ -62,17 +62,19 @@ public class Events {
                     Map.Entry<String, Event> eventToPublish = events.entrySet().iterator().next();
                     inProcessId = eventToPublish.getKey();
                     toBePublished=inProcessId;
-                } else
-                    System.out.println("No more events left for Event key "+eventId);
+                } else {
+                    inProcessId = "";
+                    System.out.println("No more events left for Event key " + eventId);
+                }
             } else {
                 //publish this event
                 toBePublished=inProcessId;
                 //getEventToBePublished();
             }
         }
-        if(toBePublished.isEmpty())
+        if(toBePublished.isEmpty() && !inProcessId.isEmpty())
             System.out.println("Not publishing any event as there is another event "+inProcessId+" already in process. So toBePublished : "+toBePublished);
-        else
+        else if(!toBePublished.isEmpty())
             System.out.println("Event to be published is "+toBePublished);
         return this;
     }

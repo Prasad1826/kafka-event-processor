@@ -21,7 +21,7 @@ public class EventConsumer {
     public static void main(String []args) {
         props.setProperty("bootstrap.servers", "localhost:9092");
         props.setProperty("group.id", "edtest2");
-        props.setProperty("enable.auto.commit", "true");
+        //props.setProperty("enable.auto.commit", "true");
         props.setProperty("auto.commit.interval.ms", "1000");
         props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         props.put("value.deserializer", EventSerde.class.getName());

@@ -8,7 +8,7 @@ public class Event {
     boolean complete;
 
     public Event(String id, String data, String status, boolean complete) {
-        System.out.println("Inside Event constructor");
+        //System.out.println("Inside Event constructor");
         this.id = id;
         this.data = data;
         this.status = status;
