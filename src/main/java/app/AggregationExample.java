@@ -17,6 +17,7 @@ public final class AggregationExample {
 
     public static void main(final String[] args) {
         final Properties props = new Properties();
+        props.put(StreamsConfig.PROCESSING_GUARANTEE_CONFIG, StreamsConfig.EXACTLY_ONCE);
         props.put(StreamsConfig.APPLICATION_ID_CONFIG, "streams-eventprocessor2");
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         props.put(StreamsConfig.STATE_DIR_CONFIG, "/Users/prasad/kafkadata/kafka-streams");
