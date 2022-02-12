@@ -1,15 +1,16 @@
 package app;
 
 import model.Event;
-import model.Events;
+import model.EventStore;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.serialization.StringSerializer;
+import org.apache.kafka.clients.producer.RecordMetadata;
 import serde.EventSerde;
-import serde.EventsSerde;
 
 import java.util.Properties;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 /**
  * @author Prasad Bonuboina
@@ -17,7 +18,7 @@ import java.util.Properties;
 public class EventProducer {
     static Properties props = new Properties();
 
-    public static void main(String []args) {
+    public static void main(String []args) throws ExecutionException, InterruptedException {
         props.put("bootstrap.servers", "localhost:9092");
         props.put("acks", "all");
         props.put("batch.size", "1");
@@ -34,7 +35,7 @@ public class EventProducer {
         Producer<String, String> producer = new KafkaProducer<>(props);
 
         for (int i = 0; i < n; i++) {
-            ProducerRecord<String, String> rec = new ProducerRecord<String, String>("streams-edtest2-output",
+            ProducerRecord<String, String> rec = new ProducerRecord<String, String>("streams-ep1-output",
                     "key-"+Integer.toString(i), ""+System.currentTimeMillis());
             System.out.println(rec);
             producer.send(rec);
@@ -47,64 +48,68 @@ public class EventProducer {
         producer.flush();
         producer.close();
     }
-    static void produceEvent() {
+    static void produceEvent() throws ExecutionException, InterruptedException {
 
         Producer<String, Event> producer = new KafkaProducer<>(props);
-        int count = 10;
+        int count = 1;
         String status = "START";
         for (int i = 0; i < count ; i++) {
-            String eventId = (1000+i)+"-TRD-1";
+            String eventId = (1000+i)+"-1";
             String key = eventId.substring(0, eventId.lastIndexOf("-"));
             //System.out.println(key);
-            producer.send(new ProducerRecord<String, Event>("streams-edtest2-input",
+            Future<RecordMetadata> future = producer.send(new ProducerRecord<>("streams-ep1-input",
                     key,
                     new Event(eventId, "" + System.currentTimeMillis(), status, false))
             );
             producer.flush();
+            System.out.println("eventId: "+ eventId + " Offset : " + future.get().offset());
         }
         status = "START";
         for (int i = 0; i < count ; i++) {
-            String eventId = (1000+i)+"-TRD-2";
+            String eventId = (1000+i)+"-2";
             String key = eventId.substring(0, eventId.lastIndexOf("-"));
             //System.out.println(key);
-            producer.send(new ProducerRecord<String, Event>("streams-edtest2-input",
+            Future<RecordMetadata> future = producer.send(new ProducerRecord<>("streams-ep1-input",
                     key,
                     new Event(eventId, "" + System.currentTimeMillis(), status, false))
             );
             producer.flush();
+            System.out.println("eventId: "+ eventId + " Offset : " + future.get().offset());
         }
         status = "STOP";
         for (int i = 0; i < count ; i++) {
-            String eventId = (1000+i)+"-TRD-1";
+            String eventId = (1000+i)+"-1";
             String key = eventId.substring(0, eventId.lastIndexOf("-"));
             //System.out.println(key);
-            producer.send(new ProducerRecord<String, Event>("streams-edtest2-input",
+            Future<RecordMetadata> future = producer.send(new ProducerRecord<>("streams-ep1-input",
                     key,
                     new Event(eventId, "" + System.currentTimeMillis(), status, false))
             );
             producer.flush();
+            System.out.println("eventId: "+ eventId + " Offset : " + future.get().offset());
         }
         status = "STOP";
         for (int i = 0; i < count ; i++) {
-            String eventId = (1000+i)+"-TRD-2";
+            String eventId = (1000+i)+"-2";
             String key = eventId.substring(0, eventId.lastIndexOf("-"));
             //System.out.println(key);
-            producer.send(new ProducerRecord<String, Event>("streams-edtest2-input",
+            Future<RecordMetadata> future = producer.send(new ProducerRecord<>("streams-ep1-input",
                     key,
                     new Event(eventId, "" + System.currentTimeMillis(), status, false))
             );
             producer.flush();
+            System.out.println("eventId: "+ eventId + " Offset : " + future.get().offset());
         }
         producer.close();
     }
 
     static void produceEvents(int n) {
-        Producer<String, Events> producer = new KafkaProducer<>(props);
+        Producer<String, EventStore> producer = new KafkaProducer<>(props);
 
         for (int i = 0; i < n; i++) {
-            ProducerRecord<String, Events> rec = new ProducerRecord<String, Events>("streams-edtest2-output",
+            ProducerRecord<String, EventStore> rec = new ProducerRecord<String, EventStore>("streams-ep1-output",
                     "key-"+Integer.toString(i),
-                    new Events(Integer.toString(i), new Event(Integer.toString(i), "Test", "START", false)));
+                    new EventStore(Integer.toString(i), new Event(Integer.toString(i), "Test", "START", false)));
             System.out.println(rec);
             producer.send(rec);
             System.out.println("Sent Events object");

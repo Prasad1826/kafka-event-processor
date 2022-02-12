@@ -3,14 +3,14 @@ package model;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Events {
+public class EventStore {
 
     String eventId;
     Map<String, Event> events = new HashMap<>();
     String inProcessId = "";
     String toBePublished = "";
 
-    public Events(String eventId, Event event) {
+    public EventStore(String eventId, Event event) {
         //System.out.println("Inside Events constructor<String, Event>");
         initialize(eventId, event);
     }
@@ -24,7 +24,7 @@ public class Events {
         this.events.put(event.getId(), event);
         this.inProcessId = event.getId();
     }
-    public Events(String eventId, Map<String, Event> events, String inProcessId, String toBePublished) {
+    public EventStore(String eventId, Map<String, Event> events, String inProcessId, String toBePublished) {
         //System.out.println("Inside Events constructor..");
         this.eventId = eventId;
         this.events = events;
@@ -32,12 +32,12 @@ public class Events {
         this.toBePublished = toBePublished;
     }
 
-    public Events() {
+    public EventStore() {
        // System.out.println("Inside Events constructor");
         eventId = "";
     }
 
-    public Events process(String eventId, Event event) {
+    public EventStore process(String eventId, Event event) {
 
         toBePublished="";
         String newStatus = event.getStatus();

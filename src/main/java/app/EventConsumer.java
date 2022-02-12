@@ -1,12 +1,10 @@
 package app;
 
 import model.Event;
-import model.Events;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import serde.EventSerde;
-import serde.EventsSerde;
 
 import java.time.Duration;
 import java.util.Arrays;
@@ -20,7 +18,7 @@ public class EventConsumer {
 
     public static void main(String []args) {
         props.setProperty("bootstrap.servers", "localhost:9092");
-        props.setProperty("group.id", "edtest2");
+        props.setProperty("group.id", "ep1");
         //props.setProperty("enable.auto.commit", "true");
         props.setProperty("auto.commit.interval.ms", "1000");
         props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
@@ -34,7 +32,7 @@ public class EventConsumer {
     static void consumeEvent() {
         System.out.println("Inside consumeEvents");
         KafkaConsumer<String, Event> consumer = new KafkaConsumer<>(props);
-        consumer.subscribe(Arrays.asList("streams-edtest2-output"));
+        consumer.subscribe(Arrays.asList("streams-ep1-output"));
 
         while (true) {
             ConsumerRecords<String, Event> records = consumer.poll(Duration.ofMillis(10));
@@ -48,7 +46,7 @@ public class EventConsumer {
 
     static void consumeString() {
         KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
-        consumer.subscribe(Arrays.asList("streams-edtest2-output"));
+        consumer.subscribe(Arrays.asList("streams-ep1-output"));
 
         while (true) {
             ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(1000));
