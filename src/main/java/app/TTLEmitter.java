@@ -59,7 +59,6 @@ public class TTLEmitter<K, V, R> implements Transformer<K, V, R> {
             // scan over all the keys in this partition's store
             // this can be optimized, but just keeping it simple.
             // this might take a while, so the Streams timeouts should take this into account
-
             try (final KeyValueIterator<K, Long> all = stateStore.all()) {
                 while (all.hasNext()) {
                     final KeyValue<K, Long> record = all.next();

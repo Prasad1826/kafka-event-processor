@@ -6,14 +6,24 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.*;
+import org.apache.kafka.streams.errors.StreamsUncaughtExceptionHandler;
 import org.apache.kafka.streams.kstream.*;
 import org.apache.kafka.streams.state.KeyValueStore;
-import serde.*;
+import org.apache.kafka.streams.state.StoreBuilder;
+import org.apache.kafka.streams.state.Stores;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import serde.EventSerde;
+import serde.EventStoreSerde;
+import tf.MyTransformer;
 
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
 public final class AggregationExample {
+    private static final Logger logger = LogManager.getLogger(AggregationExample.class);
+    public static final String INPUT_TOPIC = "streams-ep1-input";
+    public static final String STORE_NAME = "event-processor";
 
     public static void main(final String[] args) {
         final Properties props = new Properties();
@@ -23,6 +33,7 @@ public final class AggregationExample {
         props.put(StreamsConfig.STATE_DIR_CONFIG, "/Users/prasadbonuboina/kstream");
         props.put(StreamsConfig.CACHE_MAX_BYTES_BUFFERING_CONFIG, 0);
         props.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 100);
+        props.put(StreamsConfig.NUM_STREAM_THREADS_CONFIG, 2);
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, EventSerde.class.getName());
 
@@ -30,12 +41,12 @@ public final class AggregationExample {
 
         final StreamsBuilder builder = new StreamsBuilder();
 
-        final KStream<String, Event> source = builder.stream("streams-ep1-input");
+        final KStream<String, Event> source = builder.stream(INPUT_TOPIC);
 
         final KTable<String, EventStore> eventDispatcher = source.groupByKey()
                 .aggregate(EventStore::new,
                         (key, event, events) -> events.process(key, event),
-                        Materialized.<String, EventStore, KeyValueStore<Bytes, byte[]>>as("event-processor")
+                        Materialized.<String, EventStore, KeyValueStore<Bytes, byte[]>>as(STORE_NAME)
                                 .withKeySerde(Serdes.String())
                                 .withValueSerde(new EventStoreSerde())
                 );
@@ -43,6 +54,10 @@ public final class AggregationExample {
                 .filter((key, value)->value.hasTobeProcessed())
                 .map((key, value)-> KeyValue.pair(key,value.getToBeProcessed()))
                 .to("streams-ep1-output", Produced.with(Serdes.String(), new EventSerde()));
+
+
+        eventDispatcher.toStream().transform((TransformerSupplier) () -> new MyTransformer(AggregationExample.STORE_NAME, AggregationExample.INPUT_TOPIC), STORE_NAME);
+        //createTTL(builder, eventDispatcher);
 
         Topology topology = builder.build();
 
@@ -62,6 +77,11 @@ public final class AggregationExample {
         });
 
         try {
+            streams.setUncaughtExceptionHandler(throwable -> {
+                System.out.println("Uncaught exception");
+                logger.error("", throwable);
+                return null;
+            });
             streams.start();
             latch.await();
         } catch (final Throwable e) {
